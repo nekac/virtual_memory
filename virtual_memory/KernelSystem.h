@@ -1,24 +1,20 @@
 #ifndef  _KERNELSYSTEM_H_
 #define  _KERNELSYSTEM_H_
 
+// File: KernelSystem.h 
 #include "part.h"
 #include "PMTdata.h"
 #include "System.h"
 
 class KernelSystem
 {
-public:
-	KernelSystem(PhysicalAddress processVMSpace, PageNum processVMSpaceSize, PhysicalAddress pmtSpace,  PageNum pmtSpaceSize,  Partition* partition);
-	~KernelSystem();
-	Process* createProcess();
-	Time periodicJob();
-	Status access(ProcessId pid, VirtualAddress address, AccessType type);
-
 private:
 	PhysicalAddress m_processVMSpace;
 	PageNum m_processVMSpaceSize;
+
 	PhysicalAddress m_pmtSpace;
 	PageNum m_pmtSpaceSize;
+
 	Partition* m_partition;
 
 	FrameEntry *m_frameEntry;
@@ -32,6 +28,15 @@ private:
 	PMTEntry *m_pmtEntry;
 
 	ProcessId m_nextProcessId;
+
+public:
+	KernelSystem(PhysicalAddress processVMSpace, PageNum processVMSpaceSize, PhysicalAddress pmtSpace,  PageNum pmtSpaceSize,  Partition* partition);
+	~KernelSystem();
+
+	Process* createProcess();
+	Time periodicJob();
+	Status access(ProcessId pid, VirtualAddress address, AccessType type);
+
 };
 
 #endif

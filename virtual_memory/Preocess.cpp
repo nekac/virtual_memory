@@ -4,39 +4,40 @@
 
 Process::Process(ProcessId pid)
 {
-	KernelProcess* p = new KernelProcess(pid);
+	KernelProcess* pProcess = new KernelProcess(pid);
 }
 
-Process::Process()
+Process::~Process()
 {
+	delete pProcess;
 }
 
 ProcessId Process::getProcessId() const
 {
-	return ProcessId();
+	return pProcess->getProcessId();
 }
 
 Status Process::createSegment(VirtualAddress startAddress, PageNum segmentSize, AccessRight flags)
 {
-	return OK;
+	return pProcess->createSegment(startAddress, segmentSize, flags);
 }
 
 Status Process::loadSegment(VirtualAddress startAddress, PageNum segmentSize, AccessRight flags, void* content)
 {
-	return OK;
+	return pProcess->loadSegment(startAddress, segmentSize, flags, content);
 }
 
 Status Process::deleteSegment(VirtualAddress startAddress)
 {
-	return OK;
+	return pProcess->deleteSegment(startAddress);
 }
 
 Status Process::pageFault(VirtualAddress address)
 {
-	return OK;
+	return pProcess->pageFault(address);
 }
 
 PhysicalAddress Process::getPhysicalAddress(VirtualAddress address)
 {
-	return nullptr;
+	return pProcess->getPhysicalAddress(address);
 }

@@ -4,18 +4,22 @@
 #include "Preocess.h"
 #include "KernelProcess.h"
 
+// processVMSpace - pokazivac na pocetak prostora u memoriji za smestanje stranica procesa
+// processVMSpaceSize - velicina tog prostora za stranice
+// pmtSpace - pokazivac na pocetak prostora za smestanje tabela preslikavanja
+// prtSpaceSize - velicina tog prostora za tabele
+// partition - pokazivac na particiju koja sluzi za zamenu
 
-KernelSystem::KernelSystem(PhysicalAddress processVMSpace, PageNum processVMSpaceSize, 
-	PhysicalAddress pmtSpace, PageNum pmtSpaceSize, Partition * partition)
-	: m_processVMSpace(processVMSpace)
-	, m_processVMSpaceSize(processVMSpaceSize)
-	, m_pmtSpace(pmtSpace)
-	, m_pmtSpaceSize(pmtSpaceSize)
-	, m_partition(partition)
-	
-{
+KernelSystem::KernelSystem(PhysicalAddress processVMSpace, PageNum processVMSpaceSize, PhysicalAddress pmtSpace, PageNum pmtSpaceSize, Partition * partition) {
+	m_processVMSpace = processVMSpace;
+	m_processVMSpaceSize = processVMSpaceSize;
+	m_pmtSpace = pmtSpace;
+	m_pmtSpaceSize = pmtSpaceSize;
+	m_partition = partition;
 
 	m_nextProcessId = 0;
+
+	// prostor za stranice svakog od procesa
 
 	m_frameEntry = (FrameEntry*) pmtSpace;
 	for(PageNum i = 0; i<processVMSpaceSize; i++){
@@ -25,7 +29,7 @@ KernelSystem::KernelSystem(PhysicalAddress processVMSpace, PageNum processVMSpac
 	size_t totalPMT_size = pmtSpaceSize * PAGE_SIZE;
 	size_t totalPMT_size_afterFrameAlloc = totalPMT_size - sizeof(FrameEntry) * processVMSpaceSize;
 
-	// bit vector size calculations
+	// prostor za bit vektore (izracunavanje)
 
 	m_numOfClusters = partition->getNumOfClusters();
 
@@ -38,7 +42,7 @@ KernelSystem::KernelSystem(PhysicalAddress processVMSpace, PageNum processVMSpac
 		m_bitVector[i] = 0;
 	}
 
-	// process entry space
+	// prostor za ulaze svakog od procesa
 
 	size_t totalPMT_size_afterBitvectorAlloc = totalPMT_size_afterFrameAlloc - m_numOfBitVectors * sizeof(unsigned);
 
@@ -48,7 +52,7 @@ KernelSystem::KernelSystem(PhysicalAddress processVMSpace, PageNum processVMSpac
 		m_processEntry[i].m_isUsed = false;
 	}
 
-	// PMT entry space
+	// prostor za ulaze u PMT
 
 	size_t totalPMT_size_afterProcessAlloc = totalPMT_size_afterBitvectorAlloc - MAX_NUM_OF_PROC * sizeof(PMTEntry);
 
@@ -60,9 +64,9 @@ KernelSystem::KernelSystem(PhysicalAddress processVMSpace, PageNum processVMSpac
 
 }
 
-
 KernelSystem::~KernelSystem()
 {
+
 }
 
 Process* KernelSystem::createProcess()
