@@ -14,6 +14,8 @@ struct PMTEntry {
 	int m_valid;
 	int m_dirty;
 	int m_frame;
+	int m_isOnDisk;
+	ClusterNo m_locationOnDisk;
 
 	SegmentEntry *m_segmentEntry;
 	// ostale informacije
@@ -26,21 +28,21 @@ struct FrameEntry {
 
 struct SegmentEntry {
 	AccessRight m_right;
-
 	PMTEntry *m_pmtEntry;
 	ProcessId m_processId;
+	bool isUsed;
+	VirtualAddress m_startAddress;
+	PageNum m_numOfPages;
 
 };
 
 struct ProcessEntry {
-	bool m_isUsed;
 	SegmentEntry m_SegmentInProcess[MAX_NUM_OF_SEG_IN_PROC];
-
 };
 
 struct PageDescriptorStorage {
 	size_t m_entrySize;
-	int m_next;
+	PageDescriptorStorage* m_next;
 	
 };
 

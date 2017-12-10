@@ -9,6 +9,9 @@
 class KernelSystem
 {
 private:
+	
+	friend KernelProcess;
+
 	PhysicalAddress m_processVMSpace;
 	PageNum m_processVMSpaceSize;
 
@@ -21,13 +24,14 @@ private:
 
 	ClusterNo m_numOfClusters;
 	size_t m_numOfBitVectors;
-	unsigned *m_bitVector;
-	ProcessEntry *m_processEntry;
+	unsigned long *m_bitVector;
 
-	int m_firstFreePageDescriptorStorage; // prvi slobodan u prostoru
-	PMTEntry *m_pmtEntry;
+	
+	PageDescriptorStorage *m_storageEmptySpace; // prvi slobodan u prostoru
 
 	ProcessId m_nextProcessId;
+
+	int nextFrame;
 
 public:
 	KernelSystem(PhysicalAddress processVMSpace, PageNum processVMSpaceSize, PhysicalAddress pmtSpace,  PageNum pmtSpaceSize,  Partition* partition);
@@ -36,6 +40,16 @@ public:
 	Process* createProcess();
 	Time periodicJob();
 	Status access(ProcessId pid, VirtualAddress address, AccessType type);
+	FrameEntry* getNextFrame(int& frameNumber);
+	ClusterNo getFirstEmptyCluster();
+	void populateFrame(int frameNumber, void* data);
+	void setClusterUsed(ClusterNo num);
+	void setClusterNotUsed(ClusterNo num);
+
+	void* AllocateSpace(size_t pmtEntryNum);
+	bool canBeMerged(PageDescriptorStorage* spaceToReturn, PageDescriptorStorage* curr);
+	void findToMerge(PageDescriptorStorage* spaceToReturn, PageDescriptorStorage* &prev, PageDescriptorStorage* &curr);
+	void DealocateSpace(void* storageEmptySpace);
 
 };
 
