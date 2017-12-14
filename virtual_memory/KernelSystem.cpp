@@ -12,7 +12,7 @@
 // prtSpaceSize - velicina tog prostora za tabele
 // partition - pokazivac na particiju koja sluzi za zamenu
 
-KernelSystem::KernelSystem(PhysicalAddress processVMSpace, PageNum processVMSpaceSize, PhysicalAddress pmtSpace, PageNum pmtSpaceSize, Partition * partition) {
+KernelSystem::KernelSystem(PhysicalAddress processVMSpace, PageNum processVMSpaceSize, PhysicalAddress pmtSpace, PageNum pmtSpaceSize, Partition * partition){
 	m_processVMSpace = processVMSpace;
 	m_processVMSpaceSize = processVMSpaceSize;
 	m_pmtSpace = pmtSpace;
@@ -59,31 +59,26 @@ KernelSystem::KernelSystem(PhysicalAddress processVMSpace, PageNum processVMSpac
 
 }
 
-KernelSystem::~KernelSystem()
-{
+KernelSystem::~KernelSystem(){
 
 }
 
-Process* KernelSystem::createProcess()
-{
+Process* KernelSystem::createProcess(){
 	Process *newProcess = new Process(++m_nextProcessId);
 	newProcess->pProcess->init(this);
 	return newProcess;
 }
 
-Time KernelSystem::periodicJob()
-{
+Time KernelSystem::periodicJob(){
 	return 0;
 }
 
 // TODO!
-Status KernelSystem::access(ProcessId pid, VirtualAddress address, AccessType type)
-{
+Status KernelSystem::access(ProcessId pid, VirtualAddress address, AccessType type){
 	return OK;
 }
 
-FrameEntry * KernelSystem::getNextFrame(int &frameNumber)
-{
+FrameEntry * KernelSystem::getNextFrame(int &frameNumber){
 	frameNumber = nextFrame;
 	FrameEntry* result = m_frameEntry + nextFrame;
 
@@ -103,8 +98,7 @@ FrameEntry * KernelSystem::getNextFrame(int &frameNumber)
 	return result;
 }
 
-ClusterNo KernelSystem::getFirstEmptyCluster()
-{
+ClusterNo KernelSystem::getFirstEmptyCluster(){
 	unsigned long index;
 	unsigned char isNonzero;
 	ClusterNo result = 0;
@@ -122,13 +116,11 @@ ClusterNo KernelSystem::getFirstEmptyCluster()
 
 }
 
-void KernelSystem::populateFrame(int frameNumber, void * data)
-{
+void KernelSystem::populateFrame(int frameNumber, void * data){
 	memcpy(((char*)(m_processVMSpace)+nextFrame*frameNumber), data, PAGE_SIZE);
 }
 
-void KernelSystem::setClusterNotUsed(ClusterNo cluster_no)
-{
+void KernelSystem::setClusterNotUsed(ClusterNo cluster_no){
 	size_t wordIndex = cluster_no / (sizeof(unsigned long) * 8);
 	size_t bitIndex = cluster_no - wordIndex * sizeof(unsigned long) * 8;
 
@@ -136,16 +128,14 @@ void KernelSystem::setClusterNotUsed(ClusterNo cluster_no)
 
 }
 
-void KernelSystem::setClusterUsed(ClusterNo cluster_no)
-{
+void KernelSystem::setClusterUsed(ClusterNo cluster_no){
 	size_t wordIndex = cluster_no / (sizeof(unsigned long) * 8);
 	size_t bitIndex = cluster_no - wordIndex * sizeof(unsigned long) * 8;
 
 	reinterpret_cast<unsigned long*>(m_bitVector)[wordIndex] |= 1 << bitIndex;
 }
 
-void* KernelSystem::AllocateSpace(size_t pmtEntrySize)
-{
+void* KernelSystem::AllocateSpace(size_t pmtEntrySize){
 	PageDescriptorStorage* prev = nullptr;
 	PageDescriptorStorage* curr = m_storageEmptySpace;
 
@@ -183,13 +173,11 @@ void* KernelSystem::AllocateSpace(size_t pmtEntrySize)
 
 }
 
-bool KernelSystem::canBeMerged(PageDescriptorStorage* spaceToReturn, PageDescriptorStorage* curr)
-{
+bool KernelSystem::canBeMerged(PageDescriptorStorage* spaceToReturn, PageDescriptorStorage* curr){
 	return curr == (PageDescriptorStorage*)((char*)spaceToReturn + spaceToReturn->m_entrySize);
 }
 
-void KernelSystem::findToMerge(PageDescriptorStorage* spaceToReturn, PageDescriptorStorage* &prev, PageDescriptorStorage* &curr)
-{
+void KernelSystem::findToMerge(PageDescriptorStorage* spaceToReturn, PageDescriptorStorage* &prev, PageDescriptorStorage* &curr){
 	prev = nullptr;
 	curr = m_storageEmptySpace;
 
@@ -200,8 +188,7 @@ void KernelSystem::findToMerge(PageDescriptorStorage* spaceToReturn, PageDescrip
 	}
 }
 
-void KernelSystem::DealocateSpace(void* storageEmptySpace)
-{
+void KernelSystem::DealocateSpace(void* storageEmptySpace){
 	PageDescriptorStorage* spaceToReturn = ((PageDescriptorStorage*)storageEmptySpace)-1;
 
 	PageDescriptorStorage* prev = nullptr;
@@ -209,8 +196,7 @@ void KernelSystem::DealocateSpace(void* storageEmptySpace)
 
 	findToMerge(spaceToReturn, prev, curr);
 
-	while (curr != nullptr)
-	{
+	while (curr != nullptr){
 		if(prev){
 			prev->m_next = curr->m_next;
 		} else {
@@ -226,7 +212,6 @@ void KernelSystem::DealocateSpace(void* storageEmptySpace)
 		spaceToReturn->m_entrySize = newSize;
 
 		findToMerge(spaceToReturn, prev, curr);
-
 	}
 
 	spaceToReturn->m_next = m_storageEmptySpace;

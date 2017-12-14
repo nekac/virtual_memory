@@ -12,7 +12,7 @@ private:
 	PartitionImpl *myImpl;
 
 public:
-	Partition(const char *); // kreiranje jedne particije, parametar je naziv konfiguracionog fajla koji sadrzi informacije
+	Partition(const char *); // kreiranje objekta particije, parametar je naziv konfiguracionog fajla koji sadrzi informacije
 	virtual ClusterNo getNumOfClusters() const; // vraca broj klastera koji pripadaju particiji
 
 	virtual int readCluster(ClusterNo, char *buffer); // cita zadati klaster sa diska i u slucaju uspeha vraca 1; u suprotnom 0

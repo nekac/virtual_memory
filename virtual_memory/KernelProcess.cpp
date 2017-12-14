@@ -5,18 +5,15 @@ KernelProcess::KernelProcess(ProcessId pid){
 }
 
 
-KernelProcess::~KernelProcess()
-{
+KernelProcess::~KernelProcess(){
 
 }
 
-ProcessId KernelProcess::getProcessId() const
-{
+ProcessId KernelProcess::getProcessId() const{
 	return ProcessId();
 }
 
-Status KernelProcess::createSegmentHelp(VirtualAddress startAddress, PageNum segmentSize, AccessRight flags, SegmentEntry* emptySegment)
-{
+Status KernelProcess::createSegmentHelp(VirtualAddress startAddress, PageNum segmentSize, AccessRight flags, SegmentEntry* emptySegment){
 	emptySegment = nullptr;
 	for(int i=0; i<MAX_NUM_OF_SEG_IN_PROC; i++){
 		if(!m_processEntry->m_SegmentInProcess[i].isUsed){
@@ -60,14 +57,12 @@ Status KernelProcess::createSegmentHelp(VirtualAddress startAddress, PageNum seg
 	return OK;
 }
 
-Status KernelProcess::createSegment(VirtualAddress startAddress, PageNum segmentSize, AccessRight flags)
-{
+Status KernelProcess::createSegment(VirtualAddress startAddress, PageNum segmentSize, AccessRight flags){
 	SegmentEntry* emptySegment = nullptr;
 	return createSegmentHelp(startAddress, segmentSize, flags, emptySegment);
 }
 
-Status KernelProcess::loadSegment(VirtualAddress startAddress, PageNum segmentSize, AccessRight flags, void * content)
-{
+Status KernelProcess::loadSegment(VirtualAddress startAddress, PageNum segmentSize, AccessRight flags, void * content){
 	SegmentEntry* emptySegment = nullptr;
 	Status status = createSegmentHelp(startAddress, segmentSize, flags, emptySegment);
 	if (status != OK){
@@ -93,8 +88,7 @@ Status KernelProcess::loadSegment(VirtualAddress startAddress, PageNum segmentSi
 	return OK;
 }
 
-SegmentEntry * KernelProcess::findSegmentByVirtualAddress(VirtualAddress address)
-{
+SegmentEntry * KernelProcess::findSegmentByVirtualAddress(VirtualAddress address){
 	for (int i = 0; i<MAX_NUM_OF_SEG_IN_PROC; i++) {
 		if (!m_processEntry->m_SegmentInProcess[i].isUsed 
 			&& 
@@ -108,8 +102,7 @@ SegmentEntry * KernelProcess::findSegmentByVirtualAddress(VirtualAddress address
 	return nullptr;
 }
 
-Status KernelProcess::deleteSegment(VirtualAddress startAddress)
-{
+Status KernelProcess::deleteSegment(VirtualAddress startAddress){
 	SegmentEntry* segment = findSegmentByVirtualAddress(startAddress);
 	if(segment == nullptr){
 		return ERROR;
@@ -132,13 +125,11 @@ Status KernelProcess::deleteSegment(VirtualAddress startAddress)
 	return OK;
 }
 
-Status KernelProcess::pageFault(VirtualAddress address)
-{
+Status KernelProcess::pageFault(VirtualAddress address){
 	return OK;
 }
 
-PhysicalAddress KernelProcess::getPhysicalAddress(VirtualAddress address)
-{
+PhysicalAddress KernelProcess::getPhysicalAddress(VirtualAddress address){
 	return PhysicalAddress();
 }
 
@@ -153,4 +144,3 @@ void KernelProcess::init(KernelSystem* kernelSystem){
 	}
 
 }
-

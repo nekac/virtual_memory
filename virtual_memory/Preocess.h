@@ -19,14 +19,14 @@ private:
 // segmenti su poravnati na pocetak stranice (stranice u segmentu imaju ista prava pristupa)
 // korisnik sve operacije vrsi na nivou logickih segmenata (segment sadrzi vise stranica)
 public:
-	Process(ProcessId pid); // kreiranje procesa
+	Process(ProcessId pid);
 	~Process();
 	ProcessId getProcessId() const;
-	
+
 	Status createSegment(VirtualAddress startAddress, PageNum segmentSize, AccessRight flags); // kreira segment
 	Status loadSegment(VirtualAddress startAddress, PageNum segmentSize, AccessRight flags, void* content); // ucitava sadrzaj u segment
 	Status deleteSegment(VirtualAddress startAddress); // uklanja segment u virtuelnom adresnom prostoru
-	Status pageFault(VirtualAddress address); // obrada stranicne greske
+	Status pageFault(VirtualAddress address); // obrada stranicne greske, kada nije pronadjena adresa
 	
 	PhysicalAddress getPhysicalAddress(VirtualAddress address); // preslikavanje virtuelne u fizicku adresu
 };

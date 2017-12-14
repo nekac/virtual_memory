@@ -4,8 +4,7 @@
 // File: PMTdata.h 
 #include "vm_declarations.h"
 
-#define MAX_NUM_OF_SEG_IN_PROC 100
-#define MAX_NUM_OF_PROC 100 // mora da se promeni!!!
+#define MAX_NUM_OF_SEG_IN_PROC 100 // uvedeno maksimalan broj segmenata u procesu 
 #define NO_NEXT_SEG -1
 
 struct SegmentEntry;
@@ -16,7 +15,6 @@ struct PMTEntry {
 	int m_frame;
 	int m_isOnDisk;
 	ClusterNo m_locationOnDisk;
-
 	SegmentEntry *m_segmentEntry;
 	// ostale informacije
 };
@@ -33,7 +31,6 @@ struct SegmentEntry {
 	bool isUsed;
 	VirtualAddress m_startAddress;
 	PageNum m_numOfPages;
-
 };
 
 struct ProcessEntry {
@@ -47,6 +44,3 @@ struct PageDescriptorStorage {
 };
 
 #endif
-
-
-

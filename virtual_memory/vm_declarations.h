@@ -8,13 +8,12 @@ typedef unsigned long VirtualAddress;
 typedef void* PhysicalAddress;
 typedef unsigned long Time;
 typedef unsigned long AccessRight;
-enum Status { OK, PAGE_FAULT, TRAP, ERROR };
+enum Status { OK, PAGE_FAULT, TRAP, ERROR }; // novi tip statusa geske dodat
 
-// enum AccessType { READ, WRITE, READ_WRITE, EXECUTE };
-
+// tipovima pristupa sam dodelio vrednosi koje u okviru koda vracaju
 enum AccessType { READ=1, WRITE=2, READ_WRITE=4, EXECUTE=8 };
 
 typedef unsigned ProcessId;
-#define PAGE_SIZE 1024 
+#define PAGE_SIZE 1024 // 1KB
 
 #endif

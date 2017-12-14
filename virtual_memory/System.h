@@ -12,7 +12,7 @@ class KernelSystem;
 // klasa koja rukuje prostorom u memoriji; ovo je interfejs ka KernelSystem
 class System {
 private:
-	KernelSystem *pSystem; // tu su implementirane operacije
+	KernelSystem *pSystem; // implementacija sistema
 	friend class Process;
 	friend class KernelProcess;
 
@@ -20,7 +20,7 @@ public:
 	// processVMSpace - pokazivac na pocetak prostora u memoriji za smestanje stranica procesa
 	// processVMSpaceSize - velicina tog prostora za stranice
 	// pmtSpace - pokazivac na pocetak prostora za smestanje tabela preslikavanja
-	// prtSpaceSize - velicina tog prostora za tabele
+	// pmtSpaceSize - velicina tog prostora za tabele
 	// partition - pokazivac na particiju koja sluzi za zamenu
 	System(PhysicalAddress processVMSpace, PageNum processVMSpaceSize, PhysicalAddress pmtSpace, PageNum pmtSpaceSize, Partition* partition);
 	~System();
