@@ -27,6 +27,7 @@ public:
 	Status createSegmentHelp(VirtualAddress startAddress, PageNum segmentSize, AccessRight flags, SegmentEntry* emptySegment);
 	SegmentEntry* findSegmentByVirtualAddress(VirtualAddress address);
 	void init(KernelSystem*);
+	void deInit();
 
 };
 

@@ -5,6 +5,7 @@
 #include "part.h"
 #include "PMTdata.h"
 #include "System.h"
+#include <map>
 
 class KernelSystem {
 private:
@@ -23,7 +24,9 @@ private:
 	unsigned long *m_bitVector;
 	PageDescriptorStorage *m_storageEmptySpace; // prvi slobodan u prostoru
 	ProcessId m_nextProcessId;
-	int nextFrame;
+	int m_nextFrame;
+
+	std::map<ProcessId, KernelProcess*> m_allProc;
 
 public:
 	// metode kao u System klasi, ovde se implementiraju
@@ -34,7 +37,7 @@ public:
 	Status access(ProcessId pid, VirtualAddress address, AccessType type);
 
 	// dodatne metode
-	FrameEntry* getNextFrame(int& frameNumber);
+	FrameEntry* getNextFrame(PageNum& frameNumber);
 	ClusterNo getFirstEmptyCluster();
 	void populateFrame(int frameNumber, void* data);
 	void setClusterUsed(ClusterNo num);
@@ -43,7 +46,8 @@ public:
 	bool canBeMerged(PageDescriptorStorage* spaceToReturn, PageDescriptorStorage* curr);
 	void findToMerge(PageDescriptorStorage* spaceToReturn, PageDescriptorStorage* &prev, PageDescriptorStorage* &curr);
 	void DealocateSpace(void* storageEmptySpace);
-
+	PhysicalAddress getFrameAddress(PageNum index);
+	void readFromHardDrive(ClusterNo cluster_no, PhysicalAddress location);
 };
 
 #endif

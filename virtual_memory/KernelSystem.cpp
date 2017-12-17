@@ -55,7 +55,7 @@ KernelSystem::KernelSystem(PhysicalAddress processVMSpace, PageNum processVMSpac
 	((PageDescriptorStorage*)(m_storageEmptySpace))->m_next = nullptr;
 	((PageDescriptorStorage*)(m_storageEmptySpace))->m_entrySize = totalPMT_size_afterBitvectorAlloc;
 
-	nextFrame = 0;
+	m_nextFrame = 0;
 
 }
 
@@ -66,6 +66,8 @@ KernelSystem::~KernelSystem(){
 Process* KernelSystem::createProcess(){
 	Process *newProcess = new Process(++m_nextProcessId);
 	newProcess->pProcess->init(this);
+	m_allProc[newProcess->getProcessId()] = newProcess->pProcess;
+
 	return newProcess;
 }
 
@@ -73,28 +75,47 @@ Time KernelSystem::periodicJob(){
 	return 0;
 }
 
-// TODO!
 Status KernelSystem::access(ProcessId pid, VirtualAddress address, AccessType type){
+	auto it = m_allProc.find(pid);
+	if(it == m_allProc.end()){
+		return TRAP;
+	}
+
+	SegmentEntry* segment = (*it).second->findSegmentByVirtualAddress(address);
+	
+	if(!(segment->m_right & type)){
+		return TRAP;
+	}
+
+	VirtualAddress offsetInSegment = address - segment->m_startAddress;
+	VirtualAddress pageNum = offsetInSegment / PAGE_SIZE;
+
+	if(!(segment->m_pmtEntry[pageNum].m_valid)){
+		return PAGE_FAULT;
+	}
+
+	segment->m_pmtEntry[pageNum].m_dirty = segment->m_pmtEntry[pageNum].m_dirty || type == READ_WRITE || type == WRITE;
+
 	return OK;
 }
 
-FrameEntry * KernelSystem::getNextFrame(int &frameNumber){
-	frameNumber = nextFrame;
-	FrameEntry* result = m_frameEntry + nextFrame;
+FrameEntry* KernelSystem::getNextFrame(PageNum &frameNumber){
+	frameNumber = m_nextFrame;
+	FrameEntry* result = m_frameEntry + m_nextFrame;
 
 	if(result->m_pmtEntry != nullptr && result->m_pmtEntry->m_valid && result->m_pmtEntry->m_dirty){
 		ClusterNo freeCluster = getFirstEmptyCluster();
 		if(freeCluster >= m_partition->getNumOfClusters()){
 			return nullptr;
 		}
-		m_partition->writeCluster(freeCluster, (char*)(m_processVMSpace) + nextFrame*PAGE_SIZE);
+		m_partition->writeCluster(freeCluster, (char*)(m_processVMSpace) + m_nextFrame*PAGE_SIZE);
 		setClusterUsed(freeCluster);
 		result->m_pmtEntry->m_dirty = false;
 		result->m_pmtEntry->m_isOnDisk = true;
 	}
 
 	result->m_pmtEntry->m_valid = false;
-	nextFrame = (nextFrame + 1) % m_processVMSpaceSize;
+	m_nextFrame = (m_nextFrame + 1) % m_processVMSpaceSize;
 	return result;
 }
 
@@ -117,7 +138,7 @@ ClusterNo KernelSystem::getFirstEmptyCluster(){
 }
 
 void KernelSystem::populateFrame(int frameNumber, void * data){
-	memcpy(((char*)(m_processVMSpace)+nextFrame*frameNumber), data, PAGE_SIZE);
+	memcpy(((char*)(m_processVMSpace)+m_nextFrame*frameNumber), data, PAGE_SIZE);
 }
 
 void KernelSystem::setClusterNotUsed(ClusterNo cluster_no){
@@ -217,4 +238,13 @@ void KernelSystem::DealocateSpace(void* storageEmptySpace){
 	spaceToReturn->m_next = m_storageEmptySpace;
 	m_storageEmptySpace = spaceToReturn;
 	
+}
+
+PhysicalAddress KernelSystem::getFrameAddress(PageNum index){
+	return (char*)m_processVMSpace + index*PAGE_SIZE;
+}
+
+void KernelSystem::readFromHardDrive(ClusterNo cluster_no, PhysicalAddress location){
+	m_partition->readCluster(cluster_no, (char*)location);
+	setClusterNotUsed(cluster_no);
 }

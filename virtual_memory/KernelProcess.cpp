@@ -6,11 +6,11 @@ KernelProcess::KernelProcess(ProcessId pid){
 
 
 KernelProcess::~KernelProcess(){
-
+	deInit();
 }
 
 ProcessId KernelProcess::getProcessId() const{
-	return ProcessId();
+	return m_pid;
 }
 
 Status KernelProcess::createSegmentHelp(VirtualAddress startAddress, PageNum segmentSize, AccessRight flags, SegmentEntry* emptySegment){
@@ -22,7 +22,7 @@ Status KernelProcess::createSegmentHelp(VirtualAddress startAddress, PageNum seg
 		}
 	}
 	if(emptySegment == nullptr){
-		return ERROR;
+		return TRAP;
 	}
 
 	VirtualAddress endAddress = startAddress + segmentSize * PAGE_SIZE;
@@ -32,7 +32,7 @@ Status KernelProcess::createSegmentHelp(VirtualAddress startAddress, PageNum seg
 			VirtualAddress iStartAddress = m_processEntry->m_SegmentInProcess[i].m_startAddress;
 			VirtualAddress iEndAddress = iStartAddress + m_processEntry->m_SegmentInProcess[i].m_numOfPages * PAGE_SIZE;
 			if(startAddress <= iStartAddress && endAddress >= iEndAddress || iStartAddress <= startAddress && iEndAddress >= endAddress){
-				return ERROR;
+				return TRAP;
 			}
 		}
 	}
@@ -40,7 +40,7 @@ Status KernelProcess::createSegmentHelp(VirtualAddress startAddress, PageNum seg
 	// inicijalizacija novog segmenta
 	emptySegment->m_pmtEntry = (PMTEntry*)m_kernelSystem->AllocateSpace(segmentSize*PAGE_SIZE);
 	if(emptySegment->m_pmtEntry == nullptr){
-		return ERROR;
+		return TRAP;
 	}
 	emptySegment->isUsed = true;
 	emptySegment->m_startAddress = startAddress;
@@ -70,10 +70,10 @@ Status KernelProcess::loadSegment(VirtualAddress startAddress, PageNum segmentSi
 	}
 
 	for (int i = 0; i < segmentSize; i++) {
-		int frameNum;
+		PageNum frameNum;
 		FrameEntry* frame = m_kernelSystem->getNextFrame(frameNum);
 		if(frame == nullptr){
-			return ERROR;
+			return TRAP;
 		}
 		frame->m_pmtEntry = (emptySegment->m_pmtEntry + i);
 		m_kernelSystem->populateFrame(frameNum, (char*)content + i * PAGE_SIZE);
@@ -105,10 +105,10 @@ SegmentEntry * KernelProcess::findSegmentByVirtualAddress(VirtualAddress address
 Status KernelProcess::deleteSegment(VirtualAddress startAddress){
 	SegmentEntry* segment = findSegmentByVirtualAddress(startAddress);
 	if(segment == nullptr){
-		return ERROR;
+		return TRAP;
 	}
 	if(segment->m_startAddress != startAddress){
-		return ERROR;
+		return TRAP;
 	}
 
 	for(int i=0; i<segment->m_numOfPages; i++){
@@ -126,11 +126,52 @@ Status KernelProcess::deleteSegment(VirtualAddress startAddress){
 }
 
 Status KernelProcess::pageFault(VirtualAddress address){
+	SegmentEntry* segment = findSegmentByVirtualAddress(address);
+	if (segment == nullptr) {
+		return TRAP;
+	}
+	VirtualAddress offsetInSegment = address - segment->m_startAddress;
+	VirtualAddress pageNum = offsetInSegment / PAGE_SIZE;
+
+	PMTEntry& pmt = segment->m_pmtEntry[pageNum];
+	
+	if(pmt.m_valid){
+		return OK; // nije ni trebao da bude page fault
+	} 
+
+	PageNum frameNum;
+	FrameEntry* frame = m_kernelSystem->getNextFrame(frameNum);
+	
+	if (frame == nullptr) {
+		return TRAP;
+	}
+	frame->m_pmtEntry = &pmt;
+
+	if (pmt.m_isOnDisk) {
+		m_kernelSystem->readFromHardDrive(pmt.m_locationOnDisk, m_kernelSystem->getFrameAddress(frameNum));
+	} 
+
+	pmt.m_dirty = pmt.m_isOnDisk;
+	pmt.m_isOnDisk = false;
+	pmt.m_valid = true;
+	pmt.m_frame = frameNum;
+
 	return OK;
 }
 
 PhysicalAddress KernelProcess::getPhysicalAddress(VirtualAddress address){
-	return PhysicalAddress();
+	SegmentEntry* segment = findSegmentByVirtualAddress(address);
+	if(segment == nullptr){
+		return 0;
+	}
+	VirtualAddress offsetInSegment = address - segment->m_startAddress;
+	VirtualAddress pageNum = offsetInSegment / PAGE_SIZE;
+	VirtualAddress offsetInPage = offsetInSegment % PAGE_SIZE;
+
+	PageNum frameOfPhAddr = segment->m_pmtEntry[pageNum].m_frame;
+	PhysicalAddress physicalAddress = (char*)(m_kernelSystem->getFrameAddress(frameOfPhAddr)) + offsetInPage;
+
+ 	return physicalAddress;
 }
 
 void KernelProcess::init(KernelSystem* kernelSystem){
@@ -142,5 +183,19 @@ void KernelProcess::init(KernelSystem* kernelSystem){
 		m_processEntry->m_SegmentInProcess[i].isUsed = false;
 		m_processEntry->m_SegmentInProcess[i].m_processId = m_pid;
 	}
+}
 
+void KernelProcess::deInit(){
+	for (int i = 0; i<MAX_NUM_OF_SEG_IN_PROC; i++) {
+		if(m_processEntry->m_SegmentInProcess[i].isUsed){
+			for(int j = 0; j < m_processEntry->m_SegmentInProcess[i].m_numOfPages; j++){
+				if(m_processEntry->m_SegmentInProcess[i].m_pmtEntry[j].m_valid){
+					m_kernelSystem->m_frameEntry[m_processEntry->m_SegmentInProcess[i].m_pmtEntry[j].m_frame].m_pmtEntry = nullptr;
+				}
+			}
+		}
+		m_kernelSystem->DealocateSpace(m_processEntry->m_SegmentInProcess[i].m_pmtEntry);
+	}
+
+	m_kernelSystem->DealocateSpace(m_processEntry);
 }

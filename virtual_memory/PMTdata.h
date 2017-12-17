@@ -12,7 +12,7 @@ struct SegmentEntry;
 struct PMTEntry {
 	int m_valid;
 	int m_dirty;
-	int m_frame;
+	PageNum m_frame;
 	int m_isOnDisk;
 	ClusterNo m_locationOnDisk;
 	SegmentEntry *m_segmentEntry;
