@@ -2,10 +2,11 @@
 #define  _KERNELSYSTEM_H_
 
 // File: KernelSystem.h 
-#include "part.h"
-#include "PMTdata.h"
-#include "System.h"
+
 #include <map>
+#include "PMTdata.h"
+class KernelProcess;
+class Process;
 
 class KernelSystem {
 private:
@@ -26,7 +27,7 @@ private:
 	ProcessId m_nextProcessId;
 	int m_nextFrame;
 
-	std::map<ProcessId, KernelProcess*> m_allProc;
+	std::map<ProcessId, KernelProcess*> m_allProc; // mapa procesa u sistemu
 
 public:
 	// metode kao u System klasi, ovde se implementiraju

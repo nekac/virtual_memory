@@ -3,6 +3,7 @@
 
 // File: PMTdata.h 
 #include "vm_declarations.h"
+#include "part.h"
 
 #define MAX_NUM_OF_SEG_IN_PROC 100 // uvedeno maksimalan broj segmenata u procesu 
 #define NO_NEXT_SEG -1
@@ -39,8 +40,7 @@ struct ProcessEntry {
 
 struct PageDescriptorStorage {
 	size_t m_entrySize;
-	PageDescriptorStorage* m_next;
-	
+	PageDescriptorStorage* m_next;	
 };
 
 #endif

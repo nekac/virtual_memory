@@ -1,5 +1,4 @@
-#ifndef  _VM_DECLARATIONS_H_
-#define  _VM_DECLARATIONS_H_
+#pragma once
 
 
 // File: vm_declarations.h 
@@ -14,6 +13,5 @@ enum Status { OK, PAGE_FAULT, TRAP };
 enum AccessType { READ=1, WRITE=2, READ_WRITE=4, EXECUTE=8 };
 
 typedef unsigned ProcessId;
-#define PAGE_SIZE 1024 // 1KB
+#define PAGE_SIZE 1024 // 1KB je velicina stranice
 
-#endif

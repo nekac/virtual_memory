@@ -1,7 +1,7 @@
 #include "KernelSystem.h"
 #include "part.h"
 #include "PMTdata.h"
-#include "Preocess.h"
+#include "Process.h"
 #include "KernelProcess.h"
 #include <intrin.h>
 #include <string.h>
@@ -113,8 +113,10 @@ FrameEntry* KernelSystem::getNextFrame(PageNum &frameNumber){
 		result->m_pmtEntry->m_dirty = false;
 		result->m_pmtEntry->m_isOnDisk = true;
 	}
-
-	result->m_pmtEntry->m_valid = false;
+	if (result->m_pmtEntry != nullptr && result->m_pmtEntry->m_valid)
+	{
+		result->m_pmtEntry->m_valid = false;
+	}
 	m_nextFrame = (m_nextFrame + 1) % m_processVMSpaceSize;
 	return result;
 }
@@ -138,7 +140,7 @@ ClusterNo KernelSystem::getFirstEmptyCluster(){
 }
 
 void KernelSystem::populateFrame(int frameNumber, void * data){
-	memcpy(((char*)(m_processVMSpace)+m_nextFrame*frameNumber), data, PAGE_SIZE);
+	memcpy(static_cast<char*>(m_processVMSpace) + PAGE_SIZE*frameNumber, data, PAGE_SIZE);
 }
 
 void KernelSystem::setClusterNotUsed(ClusterNo cluster_no){

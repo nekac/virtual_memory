@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -22,32 +22,32 @@
     <ProjectGuid>{4B5209FE-4D12-4E99-BE59-2FFAB621788D}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>virtual_memory</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -143,36 +143,36 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Library Include="part.lib" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="uputstvo_za_rad_sa_particijom.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="disk1.dat">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
-    </None>
-    <None Include="p1.ini">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="KernelProcess.h" />
     <ClInclude Include="KernelSystem.h" />
     <ClInclude Include="part.h" />
     <ClInclude Include="PMTdata.h" />
-    <ClInclude Include="Preocess.h" />
+    <ClInclude Include="Process.h" />
+    <ClInclude Include="ProcessTest.h" />
+    <ClInclude Include="RandomNumberGenerator.h" />
     <ClInclude Include="System.h" />
+    <ClInclude Include="SystemTest.h" />
     <ClInclude Include="vm_declarations.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="KernelProcess.cpp" />
     <ClCompile Include="KernelSystem.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Preocess.cpp" />
+    <ClCompile Include="Process.cpp" />
+    <ClCompile Include="ProcessTest.cpp" />
+    <ClCompile Include="RandomNumberGenerator.cpp" />
     <ClCompile Include="System.cpp" />
+    <ClCompile Include="SystemTest.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="disk1.dat" />
+    <None Include="p1.ini" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="part.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="uputstvo_za_rad_sa_particijom.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

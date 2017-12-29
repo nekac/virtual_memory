@@ -1,4 +1,6 @@
 #include "KernelProcess.h"
+#include "Process.h"
+#include "KernelSystem.h"
 
 KernelProcess::KernelProcess(ProcessId pid){
 	m_pid = pid;
@@ -13,7 +15,7 @@ ProcessId KernelProcess::getProcessId() const{
 	return m_pid;
 }
 
-Status KernelProcess::createSegmentHelp(VirtualAddress startAddress, PageNum segmentSize, AccessRight flags, SegmentEntry* emptySegment){
+Status KernelProcess::createSegmentHelp(VirtualAddress startAddress, PageNum segmentSize, AccessRight flags, SegmentEntry*& emptySegment){
 	emptySegment = nullptr;
 	for(int i=0; i<MAX_NUM_OF_SEG_IN_PROC; i++){
 		if(!m_processEntry->m_SegmentInProcess[i].isUsed){
@@ -45,7 +47,15 @@ Status KernelProcess::createSegmentHelp(VirtualAddress startAddress, PageNum seg
 	emptySegment->isUsed = true;
 	emptySegment->m_startAddress = startAddress;
 	emptySegment->m_numOfPages = segmentSize;
-	emptySegment->m_right = flags;
+	if(flags == READ_WRITE)
+	{
+		emptySegment->m_right = READ | WRITE | READ_WRITE;
+	}
+	else
+	{
+		emptySegment->m_right = flags;
+	}
+	
 	
 	// u segmentu page-ovi
 
@@ -90,7 +100,7 @@ Status KernelProcess::loadSegment(VirtualAddress startAddress, PageNum segmentSi
 
 SegmentEntry * KernelProcess::findSegmentByVirtualAddress(VirtualAddress address){
 	for (int i = 0; i<MAX_NUM_OF_SEG_IN_PROC; i++) {
-		if (!m_processEntry->m_SegmentInProcess[i].isUsed 
+		if (m_processEntry->m_SegmentInProcess[i].isUsed 
 			&& 
 			m_processEntry->m_SegmentInProcess[i].m_startAddress <= address 
 			&&
@@ -186,15 +196,10 @@ void KernelProcess::init(KernelSystem* kernelSystem){
 }
 
 void KernelProcess::deInit(){
-	for (int i = 0; i<MAX_NUM_OF_SEG_IN_PROC; i++) {
-		if(m_processEntry->m_SegmentInProcess[i].isUsed){
-			for(int j = 0; j < m_processEntry->m_SegmentInProcess[i].m_numOfPages; j++){
-				if(m_processEntry->m_SegmentInProcess[i].m_pmtEntry[j].m_valid){
-					m_kernelSystem->m_frameEntry[m_processEntry->m_SegmentInProcess[i].m_pmtEntry[j].m_frame].m_pmtEntry = nullptr;
-				}
-			}
+	for (int i = 0; i < MAX_NUM_OF_SEG_IN_PROC; i++) {
+		if (m_processEntry->m_SegmentInProcess[i].isUsed) {
+			deleteSegment(m_processEntry->m_SegmentInProcess[i].m_startAddress);
 		}
-		m_kernelSystem->DealocateSpace(m_processEntry->m_SegmentInProcess[i].m_pmtEntry);
 	}
 
 	m_kernelSystem->DealocateSpace(m_processEntry);

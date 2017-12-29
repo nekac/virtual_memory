@@ -2,8 +2,11 @@
 #define  _KERNELPROCESS_H_
 
 // File: KernelProcess.h 
-#include "Preocess.h"
-#include "KernelSystem.h"
+#include "vm_declarations.h"
+
+class KernelSystem;
+struct ProcessEntry;
+struct SegmentEntry;
 
 class KernelProcess
 {
@@ -24,7 +27,7 @@ public:
 	PhysicalAddress getPhysicalAddress(VirtualAddress address);
 
 	// dodatne metode
-	Status createSegmentHelp(VirtualAddress startAddress, PageNum segmentSize, AccessRight flags, SegmentEntry* emptySegment);
+	Status createSegmentHelp(VirtualAddress startAddress, PageNum segmentSize, AccessRight flags, SegmentEntry*& emptySegment);
 	SegmentEntry* findSegmentByVirtualAddress(VirtualAddress address);
 	void init(KernelSystem*);
 	void deInit();
